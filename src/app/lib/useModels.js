@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { IMAGE_COSTS, VIDEO_COSTS } from './credits';
 
 const MODELS_URL = 'https://gen.pollinations.ai/image/models';
 const CACHE_KEY = 'elixpo_models_cache';
@@ -24,7 +25,7 @@ const FALLBACK = {
 
 FALLBACK.all = [...FALLBACK.imageModels, ...FALLBACK.videoModels];
 
-function parseModels(raw) {
+export function parseModels(raw) {
   const imageModels = [];
   const videoModels = [];
   const editModels = [];
@@ -34,7 +35,8 @@ function parseModels(raw) {
 
     const canEdit = m.input_modalities?.includes('text') && m.input_modalities?.includes('image');
     const entry = {
-      id: m.name,
+      // Keep our configured pricing IDs when the catalog promotes a new canonical name.
+      id: [m.name, ...(m.aliases || [])].find((id) => Object.hasOwn(IMAGE_COSTS, id) || Object.hasOwn(VIDEO_COSTS, id)) || m.name,
       label: m.description?.split(' - ')[0] || m.name,
       desc: m.description?.split(' - ')[1] || '',
       canEdit,
